@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
  Tencent is pleased to support the open source community by making QMUI_Android available.
 
@@ -14,9 +15,21 @@
  limitations under the License.
 -->
 
-<androidx.appcompat.widget.AppCompatImageView style="?attr/QMUITipNewStyle"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_gravity="center_vertical"
-    android:contentDescription="Update tips"
-    app:qmui_skin_src="?attr/qmui_skin_support_common_list_new_drawable"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="9dp"
+    android:height="12dp"
+    android:viewportWidth="9"
+    android:viewportHeight="12">
+  <path
+      android:pathData="M5.5,11l0,-11l-1.5,-0l0,11z"
+      android:strokeWidth="1"
+      android:fillColor="#FFFFFF"
+      android:fillType="evenOdd"
+      android:strokeColor="#00000000"/>
+  <path
+      android:pathData="M4.7587,9.5304l2.7413,-2.5304l1.0174,1.1022l-3.7587,3.4696l-3.7587,-3.4696l1.0174,-1.1022z"
+      android:strokeWidth="1"
+      android:fillColor="#FFFFFF"
+      android:fillType="nonZero"
+      android:strokeColor="#00000000"/>
+</vector>

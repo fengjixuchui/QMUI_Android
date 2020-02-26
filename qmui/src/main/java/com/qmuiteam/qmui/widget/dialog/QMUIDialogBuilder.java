@@ -99,6 +99,7 @@ public abstract class QMUIDialogBuilder<T extends QMUIDialogBuilder> {
     private int mActionDividerColorAttr = R.attr.qmui_skin_support_dialog_action_divider_color;
     private int mActionDividerInsetStart = 0;
     private int mActionDividerInsetEnd = 0;
+    private int mActionDividerColor = 0;
     private boolean mCheckKeyboardOverlay = false;
     private QMUISkinManager mSkinManager;
     private float mMaxPercent = 0.75f;
@@ -166,6 +167,27 @@ public abstract class QMUIDialogBuilder<T extends QMUIDialogBuilder> {
         mActionDividerColorAttr = colorAttr;
         mActionDividerInsetStart = startInset;
         mActionDividerInsetEnd = endInset;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setActionDividerInsetAndThickness(int thickness, int startInset, int endInset){
+        mActionDividerThickness = thickness;
+        mActionDividerInsetStart = startInset;
+        mActionDividerInsetEnd = endInset;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setActionDividerColorAttr(int colorAttr){
+        mActionDividerColorAttr = colorAttr;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setActionDividerColor(int color){
+        mActionDividerColor = color;
+        mActionDividerColorAttr = 0;
         return (T) this;
     }
 
@@ -411,15 +433,31 @@ public abstract class QMUIDialogBuilder<T extends QMUIDialogBuilder> {
 
     }
 
+    protected void skinConfigDialogView(QMUIDialogView dialogView){
+        QMUISkinValueBuilder valueBuilder = QMUISkinValueBuilder.acquire();
+        valueBuilder.background(R.attr.qmui_skin_support_dialog_bg);
+        QMUISkinHelper.setSkinValue(dialogView, valueBuilder);
+        QMUISkinValueBuilder.release(valueBuilder);
+    }
+    protected void skinConfigTitleView(TextView titleView){
+        QMUISkinValueBuilder valueBuilder = QMUISkinValueBuilder.acquire();
+        valueBuilder.textColor(R.attr.qmui_skin_support_dialog_title_text_color);
+        QMUISkinHelper.setSkinValue(titleView, valueBuilder);
+        QMUISkinValueBuilder.release(valueBuilder);
+    }
+    protected void skinConfigActionContainer(ViewGroup actionContainer){
+        QMUISkinValueBuilder valueBuilder = QMUISkinValueBuilder.acquire();
+        valueBuilder.topSeparator(R.attr.qmui_skin_support_dialog_action_container_separator_color);
+        QMUISkinHelper.setSkinValue(actionContainer, valueBuilder);
+        QMUISkinValueBuilder.release(valueBuilder);
+    }
+
     @NonNull
     protected QMUIDialogView onCreateDialogView(@NonNull Context context){
         QMUIDialogView dialogView = new QMUIDialogView(context);
         dialogView.setBackground(QMUIResHelper.getAttrDrawable(context, R.attr.qmui_skin_support_dialog_bg));
         dialogView.setRadius(QMUIResHelper.getAttrDimen(context, R.attr.qmui_dialog_radius));
-        QMUISkinValueBuilder valueBuilder = QMUISkinValueBuilder.acquire();
-        valueBuilder.background(QMUIResHelper.getAttrString(context, R.attr.qmui_skin_def_dialog_bg));
-        QMUISkinHelper.setSkinValue(dialogView, valueBuilder);
-        QMUISkinValueBuilder.release(valueBuilder);
+        skinConfigDialogView(dialogView);
         return dialogView;
     }
 
@@ -436,11 +474,7 @@ public abstract class QMUIDialogBuilder<T extends QMUIDialogBuilder> {
             tv.setId(R.id.qmui_dialog_title_id);
             tv.setText(mTitle);
             QMUIResHelper.assignTextViewWithAttr(tv, R.attr.qmui_dialog_title_style);
-            QMUISkinValueBuilder valueBuilder = QMUISkinValueBuilder.acquire();
-
-            valueBuilder.textColor(QMUIResHelper.getAttrString(context, R.attr.qmui_skin_def_dialog_title_text_color));
-            QMUISkinHelper.setSkinValue(tv, valueBuilder);
-            QMUISkinValueBuilder.release(valueBuilder);
+            skinConfigTitleView(tv);
             return tv;
         }
         return null;
@@ -512,13 +546,14 @@ public abstract class QMUIDialogBuilder<T extends QMUIDialogBuilder> {
             final QMUILinearLayout layout = new QMUILinearLayout(context, null, R.attr.qmui_dialog_action_container_style);
             layout.setId(R.id.qmui_dialog_operator_layout_id);
             layout.setOrientation(mActionContainerOrientation == VERTICAL ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+            skinConfigActionContainer(layout);
 
             for (int i = 0; i < size; i++) {
                 if (spaceInsertPos == i) {
                     layout.addView(createActionContainerSpace(context));
                 }
                 QMUIDialogAction action = mActions.get(i);
-
+                action.skinSeparatorColorAttr(mActionDividerColorAttr);
                 LinearLayout.LayoutParams actionLp;
                 if (mActionContainerOrientation == VERTICAL) {
                     actionLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, actionHeight);
@@ -539,14 +574,15 @@ public abstract class QMUIDialogBuilder<T extends QMUIDialogBuilder> {
 
                 // add divider
                 if (mActionDividerThickness > 0 && i > 0 && spaceInsertPos != i) {
+                    int color = mActionDividerColorAttr == 0 ? mActionDividerColor :
+                            QMUISkinHelper.getSkinColor(actionView, mActionDividerColorAttr);
                     if (mActionContainerOrientation == VERTICAL) {
-                        actionView.onlyShowTopDivider(mActionDividerInsetStart, mActionDividerInsetEnd,
-                                mActionDividerThickness, QMUISkinHelper.getSkinColor(actionView, mActionDividerColorAttr));
+                        actionView.onlyShowTopDivider(mActionDividerInsetStart,
+                                mActionDividerInsetEnd, mActionDividerThickness, color);
                     } else {
-                        actionView.onlyShowLeftDivider(mActionDividerInsetStart, mActionDividerInsetEnd,
-                                mActionDividerThickness, QMUISkinHelper.getSkinColor(actionView, mActionDividerColorAttr));
+                        actionView.onlyShowLeftDivider(mActionDividerInsetStart,
+                                mActionDividerInsetEnd, mActionDividerThickness, color);
                     }
-
                 }
 
                 actionView.setChangeAlphaWhenDisable(mChangeAlphaForPressOrDisable);

@@ -151,6 +151,12 @@ public class QMUIDialog extends QMUIBaseDialog {
                 assignMessageTvWithAttr(tv, hasTitle(), R.attr.qmui_dialog_message_content_style);
                 tv.setText(mMessage);
                 tv.setMovementMethodDefault();
+
+                QMUISkinValueBuilder valueBuilder = QMUISkinValueBuilder.acquire();
+                valueBuilder.textColor(R.attr.qmui_skin_support_dialog_message_text_color);
+                QMUISkinHelper.setSkinValue(tv, valueBuilder);
+                QMUISkinValueBuilder.release(valueBuilder);
+
                 return wrapWithScroll(tv);
             }
             return null;
@@ -266,8 +272,8 @@ public class QMUIDialog extends QMUIBaseDialog {
                     mTextView.setCompoundDrawables(drawable, null, null, null);
                 }
                 QMUISkinValueBuilder valueBuilder = QMUISkinValueBuilder.acquire();
-                valueBuilder.textColor(QMUIResHelper.getAttrString(context, R.attr.qmui_skin_def_dialog_message_text_color));
-                valueBuilder.textCompoundLeftSrc(QMUIResHelper.getAttrString(context, R.attr.qmui_skin_def_s_dialog_check_drawable));
+                valueBuilder.textColor(R.attr.qmui_skin_support_dialog_message_text_color);
+                valueBuilder.textCompoundLeftSrc(R.attr.qmui_skin_support_s_dialog_check_drawable);
                 QMUISkinHelper.setSkinValue(mTextView, valueBuilder);
                 QMUISkinValueBuilder.release(valueBuilder);
                 mTextView.setOnClickListener(new View.OnClickListener() {
@@ -367,9 +373,7 @@ public class QMUIDialog extends QMUIBaseDialog {
                     QMUIResHelper.getAttrColor(context,
                             R.attr.qmui_skin_support_dialog_edit_bottom_line_color));
             QMUISkinValueBuilder builder = QMUISkinValueBuilder.acquire();
-            builder.bottomSeparator(
-                    QMUIResHelper.getAttrString(context,
-                            R.attr.qmui_skin_def_dialog_edit_bottom_line_color));
+            builder.bottomSeparator(R.attr.qmui_skin_support_dialog_edit_bottom_line_color);
             QMUISkinHelper.setSkinValue(boxLayout, builder);
 
             mEditText = new AppCompatEditText(context);
@@ -387,8 +391,8 @@ public class QMUIDialog extends QMUIBaseDialog {
                 mEditText.addTextChangedListener(mTextWatcher);
             }
             builder.clear();
-            builder.textColor(QMUIResHelper.getAttrString(context, R.attr.qmui_skin_def_dialog_edit_text_color));
-            builder.hintColor(QMUIResHelper.getAttrString(context, R.attr.qmui_skin_def_dialog_edit_text_hint_color));
+            builder.textColor(R.attr.qmui_skin_support_dialog_edit_text_color);
+            builder.hintColor(R.attr.qmui_skin_support_dialog_edit_text_hint_color);
             QMUISkinHelper.setSkinValue(mEditText, builder);
             QMUISkinValueBuilder.release(builder);
 

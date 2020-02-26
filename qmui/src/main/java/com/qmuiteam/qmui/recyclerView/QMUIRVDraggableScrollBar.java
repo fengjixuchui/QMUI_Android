@@ -1,3 +1,19 @@
+/*
+ * Tencent is pleased to support the open source community by making QMUI_Android available.
+ *
+ * Copyright (C) 2017-2018 THL A29 Limited, a Tencent company. All rights reserved.
+ *
+ * Licensed under the MIT License (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ *
+ * http://opensource.org/licenses/MIT
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.qmuiteam.qmui.recyclerView;
 
 import android.content.Context;
@@ -6,7 +22,6 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -84,7 +99,7 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
 
         @Override
         public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-            if (!mIsDraggable || mScrollBarDrawable == null) {
+            if (!mIsDraggable || mScrollBarDrawable == null || !needDrawScrollBar(rv)) {
                 return false;
             }
             int action = e.getAction();
@@ -111,7 +126,7 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
 
         @Override
         public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-            if (!mIsDraggable || mScrollBarDrawable == null) {
+            if (!mIsDraggable || mScrollBarDrawable == null || !needDrawScrollBar(rv)) {
                 return;
             }
             int action = e.getAction();
@@ -167,8 +182,8 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
         mCallback = callback;
     }
 
-    private void invalidate(){
-        if(mStickySectionLayout != null){
+    private void invalidate() {
+        if (mStickySectionLayout != null) {
             mStickySectionLayout.invalidate();
         } else if (mRecyclerView != null) {
             mRecyclerView.invalidate();
@@ -234,7 +249,7 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
         return mEnableScrollBarFadeInOut;
     }
 
-    private void commonAttachToRecyclerView(@Nullable RecyclerView recyclerView){
+    private void commonAttachToRecyclerView(@Nullable RecyclerView recyclerView) {
         if (mRecyclerView == recyclerView) {
             return; // nothing to do
         }
@@ -249,22 +264,22 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
     }
 
     public void attachToRecyclerView(@Nullable RecyclerView recyclerView) {
-        if(mStickySectionLayout != null){
+        if (mStickySectionLayout != null) {
             mStickySectionLayout.removeDrawDecoration(this);
             mStickySectionLayout = null;
         }
         commonAttachToRecyclerView(recyclerView);
     }
 
-    public void attachToStickSectionLayout(@Nullable QMUIStickySectionLayout stickySectionLayout){
-        if(mStickySectionLayout == stickySectionLayout){
+    public void attachToStickSectionLayout(@Nullable QMUIStickySectionLayout stickySectionLayout) {
+        if (mStickySectionLayout == stickySectionLayout) {
             return; // nothing to do
         }
-        if(mStickySectionLayout != null){
+        if (mStickySectionLayout != null) {
             mStickySectionLayout.removeDrawDecoration(this);
         }
         mStickySectionLayout = stickySectionLayout;
-        if(stickySectionLayout != null){
+        if (stickySectionLayout != null) {
             stickySectionLayout.addDrawDecoration(this);
             commonAttachToRecyclerView(stickySectionLayout.getRecyclerView());
         }
@@ -343,9 +358,9 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
 
     @Override
     public void onDrawOver(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-       if(mStickySectionLayout == null){
-           drawScrollBar(c, parent);
-       }
+        if (mStickySectionLayout == null) {
+            drawScrollBar(c, parent);
+        }
     }
 
     @Override
@@ -355,14 +370,14 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
 
     @Override
     public void onDrawOver(@NonNull Canvas c, @NonNull QMUIStickySectionLayout parent) {
-        if(mRecyclerView != null){
+        if (mRecyclerView != null) {
             drawScrollBar(c, mRecyclerView);
         }
     }
 
-    private void drawScrollBar(@NonNull Canvas c, @NonNull RecyclerView recyclerView){
+    private void drawScrollBar(@NonNull Canvas c, @NonNull RecyclerView recyclerView) {
         Drawable drawable = ensureScrollBar(recyclerView.getContext());
-        if (drawable == null) {
+        if (drawable == null || !needDrawScrollBar(recyclerView)) {
             return;
         }
 
@@ -393,6 +408,13 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
             return recyclerView.getHeight() - mStartMargin - mEndMargin;
         }
         return recyclerView.getWidth() - mStartMargin - mEndMargin;
+    }
+
+    private boolean needDrawScrollBar(RecyclerView recyclerView){
+        if(mIsVerticalScroll){
+            return recyclerView.canScrollVertically(-1) || recyclerView.canScrollVertically(1);
+        }
+        return recyclerView.canScrollHorizontally(-1) || recyclerView.canScrollHorizontally(1);
     }
 
     private void setScrollBarBounds(@NonNull RecyclerView recyclerView, @NonNull Drawable drawable) {
@@ -427,7 +449,7 @@ public class QMUIRVDraggableScrollBar extends RecyclerView.ItemDecoration implem
     }
 
     private float calculatePercent(@NonNull RecyclerView recyclerView) {
-        return getCurrentOffset(recyclerView) * 1f / getScrollRange(recyclerView);
+        return QMUILangHelper.constrain(getCurrentOffset(recyclerView) * 1f / getScrollRange(recyclerView), 0f, 1f);
     }
 
     public Drawable ensureScrollBar(Context context) {

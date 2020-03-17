@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.qmuiteam.qmuidemo.fragment.components;
+package com.qmuiteam.qmuidemo.fragment.components.swipeAction;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,15 +25,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.qmuiteam.qmui.nestedScroll.QMUIDraggableScrollBar;
-import com.qmuiteam.qmui.recyclerView.QMUIRVDraggableScrollBar;
 import com.qmuiteam.qmui.recyclerView.QMUIRVItemSwipeAction;
+import com.qmuiteam.qmui.recyclerView.QMUISwipeAction;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 import com.qmuiteam.qmui.widget.pullLayout.QMUIPullLayout;
 import com.qmuiteam.qmuidemo.R;
 import com.qmuiteam.qmuidemo.base.BaseFragment;
 import com.qmuiteam.qmuidemo.base.BaseRecyclerAdapter;
 import com.qmuiteam.qmuidemo.base.RecyclerViewHolder;
+import com.qmuiteam.qmuidemo.lib.Group;
 import com.qmuiteam.qmuidemo.lib.annotation.Widget;
 import com.qmuiteam.qmuidemo.manager.QDDataManager;
 import com.qmuiteam.qmuidemo.model.QDItemDescription;
@@ -46,8 +46,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-@Widget(widgetClass = QMUIRVDraggableScrollBar.class, iconRes = R.mipmap.icon_grid_scroll_animator)
-public class QDRecyclerViewDraggableScrollBarFragment extends BaseFragment {
+@Widget(group = Group.Other, name = "Swipe Left: Delete With No Action")
+public class QDRVSwipeDeleteWithNoActionFragment extends BaseFragment {
     @BindView(R.id.topbar)
     QMUITopBarLayout mTopBar;
     @BindView(R.id.pull_layout)
@@ -101,10 +101,6 @@ public class QDRecyclerViewDraggableScrollBarFragment extends BaseFragment {
             }
         });
 
-        QMUIRVDraggableScrollBar scrollBar = new QMUIRVDraggableScrollBar(0, 0, 0);
-        scrollBar.setEnableScrollBarFadeInOut(true);
-        scrollBar.attachToRecyclerView(mRecyclerView);
-
         QMUIRVItemSwipeAction swipeAction = new QMUIRVItemSwipeAction(true, new QMUIRVItemSwipeAction.Callback() {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
@@ -113,7 +109,17 @@ public class QDRecyclerViewDraggableScrollBarFragment extends BaseFragment {
 
             @Override
             public int getSwipeDirection(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                return QMUIRVItemSwipeAction.SWIPE_RIGHT;
+                return QMUIRVItemSwipeAction.SWIPE_LEFT;
+            }
+
+            @Override
+            public void onClickAction(QMUIRVItemSwipeAction swipeAction, RecyclerView.ViewHolder selected, QMUISwipeAction action) {
+                super.onClickAction(swipeAction, selected, action);
+                mAdapter.remove(selected.getAdapterPosition());
+                Toast.makeText(getContext(),
+                        "你点击了第 " + selected.getAdapterPosition() + " 个 item 的" + action.getText(),
+                        Toast.LENGTH_SHORT).show();
+                swipeAction.clear();
             }
         });
         swipeAction.attachToRecyclerView(mRecyclerView);

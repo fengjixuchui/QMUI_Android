@@ -14,26 +14,35 @@
  * limitations under the License.
  */
 
-package com.qmuiteam.qmuidemo.fragment.components;
+package com.qmuiteam.qmuidemo.fragment.components.swipeAction;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.icu.util.ValueIterator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.qmuiteam.qmui.nestedScroll.QMUIDraggableScrollBar;
+import com.qmuiteam.qmui.arch.annotation.LatestVisitRecord;
 import com.qmuiteam.qmui.recyclerView.QMUIRVDraggableScrollBar;
 import com.qmuiteam.qmui.recyclerView.QMUIRVItemSwipeAction;
+import com.qmuiteam.qmui.recyclerView.QMUISwipeAction;
+import com.qmuiteam.qmui.recyclerView.QMUISwipeViewHolder;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
 import com.qmuiteam.qmui.widget.pullLayout.QMUIPullLayout;
 import com.qmuiteam.qmuidemo.R;
 import com.qmuiteam.qmuidemo.base.BaseFragment;
 import com.qmuiteam.qmuidemo.base.BaseRecyclerAdapter;
 import com.qmuiteam.qmuidemo.base.RecyclerViewHolder;
+import com.qmuiteam.qmuidemo.lib.Group;
 import com.qmuiteam.qmuidemo.lib.annotation.Widget;
 import com.qmuiteam.qmuidemo.manager.QDDataManager;
 import com.qmuiteam.qmuidemo.model.QDItemDescription;
@@ -46,15 +55,16 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-@Widget(widgetClass = QMUIRVDraggableScrollBar.class, iconRes = R.mipmap.icon_grid_scroll_animator)
-public class QDRecyclerViewDraggableScrollBarFragment extends BaseFragment {
+@Widget(group = Group.Other, name = "Swipe Left: Muti Actions")
+@LatestVisitRecord
+public class QDRVSwipeMutiActionFragment extends BaseFragment {
     @BindView(R.id.topbar)
     QMUITopBarLayout mTopBar;
     @BindView(R.id.pull_layout)
     QMUIPullLayout mPullLayout;
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
-    private BaseRecyclerAdapter<String> mAdapter;
+    private Adapter mAdapter;
 
     private QDItemDescription mQDItemDescription;
 
@@ -101,10 +111,6 @@ public class QDRecyclerViewDraggableScrollBarFragment extends BaseFragment {
             }
         });
 
-        QMUIRVDraggableScrollBar scrollBar = new QMUIRVDraggableScrollBar(0, 0, 0);
-        scrollBar.setEnableScrollBarFadeInOut(true);
-        scrollBar.attachToRecyclerView(mRecyclerView);
-
         QMUIRVItemSwipeAction swipeAction = new QMUIRVItemSwipeAction(true, new QMUIRVItemSwipeAction.Callback() {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
@@ -113,7 +119,20 @@ public class QDRecyclerViewDraggableScrollBarFragment extends BaseFragment {
 
             @Override
             public int getSwipeDirection(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                return QMUIRVItemSwipeAction.SWIPE_RIGHT;
+                return QMUIRVItemSwipeAction.SWIPE_LEFT;
+            }
+
+            @Override
+            public void onClickAction(QMUIRVItemSwipeAction swipeAction, RecyclerView.ViewHolder selected, QMUISwipeAction action) {
+                super.onClickAction(swipeAction, selected, action);
+                Toast.makeText(getContext(),
+                        "你点击了第 " + selected.getAdapterPosition() + " 个 item 的" + action.getText(),
+                        Toast.LENGTH_SHORT).show();
+                if(action == mAdapter.mDeleteAction){
+                    mAdapter.remove(selected.getAdapterPosition());
+                }else{
+                    swipeAction.clear();
+                }
             }
         });
         swipeAction.attachToRecyclerView(mRecyclerView);
@@ -125,23 +144,7 @@ public class QDRecyclerViewDraggableScrollBarFragment extends BaseFragment {
             }
         });
 
-        mAdapter = new BaseRecyclerAdapter<String>(getContext(), null) {
-            @Override
-            public int getItemLayoutId(int viewType) {
-                return android.R.layout.simple_list_item_1;
-            }
-
-            @Override
-            public void bindData(RecyclerViewHolder holder, int position, String item) {
-                holder.setText(android.R.id.text1, item);
-            }
-        };
-        mAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View itemView, int pos) {
-                Toast.makeText(getContext(), "click position=" + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
+        mAdapter = new Adapter(getContext());
         mRecyclerView.setAdapter(mAdapter);
         onDataLoaded();
     }
@@ -170,5 +173,80 @@ public class QDRecyclerViewDraggableScrollBarFragment extends BaseFragment {
             data.add("onLoadMore-" + id + "-" + i);
         }
         mAdapter.append(data);
+    }
+
+    class Adapter extends RecyclerView.Adapter<QMUISwipeViewHolder>{
+
+        private List<String> mData = new ArrayList<>();
+
+        final QMUISwipeAction mDeleteAction;
+        final QMUISwipeAction mWriteReviewAction;
+
+        public Adapter(Context context){
+            QMUISwipeAction.ActionBuilder builder = new QMUISwipeAction.ActionBuilder()
+                    .textSize(QMUIDisplayHelper.sp2px(context, 14))
+                    .textColor(Color.WHITE)
+                    .paddingStartEnd(QMUIDisplayHelper.dp2px(getContext(), 14));
+
+            mDeleteAction = builder.text("删除").backgroundColor(Color.RED).build();
+            mWriteReviewAction = builder.text("写想法").backgroundColor(Color.BLUE).build();
+        }
+
+        public void setData(@Nullable List<String> list) {
+            mData.clear();
+            if(list != null){
+                mData.addAll(list);
+            }
+            notifyDataSetChanged();
+        }
+
+        public void remove(int pos){
+            mData.remove(pos);
+            notifyItemRemoved(pos);
+        }
+
+        public void add(int pos, String item) {
+            mData.add(pos, item);
+            notifyItemInserted(pos);
+        }
+
+        public void prepend(@NonNull List<String> items){
+            mData.addAll(0, items);
+            notifyDataSetChanged();
+        }
+
+        public void append(@NonNull List<String> items){
+            mData.addAll(items);
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public QMUISwipeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.simple_list_item_1, parent, false);
+            final QMUISwipeViewHolder vh = new QMUISwipeViewHolder(view);
+            vh.addSwipeAction(mDeleteAction);
+            vh.addSwipeAction(mWriteReviewAction);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(),
+                            "click position=" + vh.getAdapterPosition(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+            return vh;
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull QMUISwipeViewHolder holder, int position) {
+            TextView textView = holder.itemView.findViewById(R.id.text);
+            textView.setText(mData.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return mData.size();
+        }
     }
 }

@@ -22,7 +22,9 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -80,6 +82,8 @@ public class QMUITopBar extends QMUIRelativeLayout implements IQMUISkinHandlerVi
     private int mTitleGravity;
     private int mLeftBackDrawableRes;
     private int mTitleTextSize;
+    private Typeface mTitleTypeface;
+    private Typeface mSubTitleTypeface;
     private int mTitleTextSizeWithSubTitle;
     private int mSubTitleTextSize;
     private int mTitleTextColor;
@@ -91,9 +95,11 @@ public class QMUITopBar extends QMUIRelativeLayout implements IQMUISkinHandlerVi
     private int mTopBarTextBtnPaddingHor;
     private ColorStateList mTopBarTextBtnTextColor;
     private int mTopBarTextBtnTextSize;
+    private Typeface mTopBarTextBtnTypeface;
     private int mTopBarHeight = -1;
     private Rect mTitleContainerRect;
     private boolean mIsBackgroundSetterDisabled = false;
+    private TruncateAt mEllipsize;
 
     private static SimpleArrayMap<String, Integer> sDefaultSkinAttrs;
 
@@ -144,6 +150,25 @@ public class QMUITopBar extends QMUIRelativeLayout implements IQMUISkinHandlerVi
         mTopBarTextBtnPaddingHor = array.getDimensionPixelSize(R.styleable.QMUITopBar_qmui_topbar_text_btn_padding_horizontal, QMUIDisplayHelper.dp2px(context, 12));
         mTopBarTextBtnTextColor = array.getColorStateList(R.styleable.QMUITopBar_qmui_topbar_text_btn_color_state_list);
         mTopBarTextBtnTextSize = array.getDimensionPixelSize(R.styleable.QMUITopBar_qmui_topbar_text_btn_text_size, QMUIDisplayHelper.sp2px(context, 16));
+
+        mTitleTypeface = array.getBoolean(R.styleable.QMUITopBar_qmui_topbar_title_bold, false) ? Typeface.DEFAULT_BOLD : null;
+        mSubTitleTypeface = array.getBoolean(R.styleable.QMUITopBar_qmui_topbar_subtitle_bold, false) ? Typeface.DEFAULT_BOLD : null;
+        mTopBarTextBtnTypeface = array.getBoolean(R.styleable.QMUITopBar_qmui_topbar_text_btn_bold, false) ? Typeface.DEFAULT_BOLD : null;
+        int ellipsize = array.getInt(R.styleable.QMUITopBar_android_ellipsize, -1) ;
+        switch (ellipsize) {
+            case 1:
+                mEllipsize = TextUtils.TruncateAt.START;
+                break;
+            case 2:
+                mEllipsize = TextUtils.TruncateAt.MIDDLE;
+                break;
+            case 3:
+                mEllipsize = TextUtils.TruncateAt.END;
+                break;
+            default:
+                mEllipsize = null;
+                break;
+        }
         array.recycle();
     }
 
@@ -225,7 +250,8 @@ public class QMUITopBar extends QMUIRelativeLayout implements IQMUISkinHandlerVi
             mTitleView = new QMUIQQFaceView(getContext());
             mTitleView.setGravity(Gravity.CENTER);
             mTitleView.setSingleLine(true);
-            mTitleView.setEllipsize(TruncateAt.MIDDLE);
+            mTitleView.setEllipsize(mEllipsize);
+            mTitleView.setTypeface(mTitleTypeface);
             mTitleView.setTextColor(mTitleTextColor);
             QMUISkinSimpleDefaultAttrProvider provider = new QMUISkinSimpleDefaultAttrProvider();
             provider.setDefaultSkinAttr(QMUISkinValueBuilder.TEXT_COLOR, R.attr.qmui_skin_support_topbar_title_color);
@@ -283,7 +309,8 @@ public class QMUITopBar extends QMUIRelativeLayout implements IQMUISkinHandlerVi
             mSubTitleView = new QMUIQQFaceView(getContext());
             mSubTitleView.setGravity(Gravity.CENTER);
             mSubTitleView.setSingleLine(true);
-            mSubTitleView.setEllipsize(TruncateAt.MIDDLE);
+            mSubTitleView.setTypeface(mSubTitleTypeface);
+            mSubTitleView.setEllipsize(mEllipsize);
             mSubTitleView.setTextSize(mSubTitleTextSize);
             mSubTitleView.setTextColor(mSubTitleTextColor);
             QMUISkinSimpleDefaultAttrProvider provider = new QMUISkinSimpleDefaultAttrProvider();
@@ -579,6 +606,7 @@ public class QMUITopBar extends QMUIRelativeLayout implements IQMUISkinHandlerVi
         button.setMinHeight(0);
         button.setMinimumWidth(0);
         button.setMinimumHeight(0);
+        button.setTypeface(mTopBarTextBtnTypeface);
         button.setPadding(mTopBarTextBtnPaddingHor, 0, mTopBarTextBtnPaddingHor, 0);
         button.setTextColor(mTopBarTextBtnTextColor);
         button.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTopBarTextBtnTextSize);

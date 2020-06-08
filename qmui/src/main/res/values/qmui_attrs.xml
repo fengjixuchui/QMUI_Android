@@ -126,15 +126,18 @@
 
     <!--************ QMUITopBar ***********-->
     <declare-styleable name="QMUITopBar">
+        <attr name="android:ellipsize"/>
         <attr name="qmui_topbar_title_gravity" format="enum">
             <enum name="left_center" value="19"/>
             <enum name="center" value="17"/>
         </attr>
         <attr name="qmui_topbar_left_back_drawable_id" format="reference"/>
         <attr name="qmui_topbar_title_text_size" format="dimension"/>
-        <attr name="qmui_topbar_title_text_size_with_subtitle" format="dimension"/>
         <attr name="qmui_topbar_subtitle_text_size" format="dimension"/>
         <attr name="qmui_topbar_title_color" format="color"/>
+        <attr name="qmui_topbar_title_bold" format="boolean"/>
+        <attr name="qmui_topbar_title_text_size_with_subtitle" format="dimension"/>
+        <attr name="qmui_topbar_subtitle_bold" format="boolean"/>
         <attr name="qmui_topbar_subtitle_color" format="color"/>
         <attr name="qmui_topbar_title_margin_horizontal_when_no_btn_aside" format="dimension"/>
         <attr name="qmui_topbar_title_container_padding_horizontal" format="dimension"/>
@@ -143,6 +146,7 @@
         <attr name="qmui_topbar_text_btn_padding_horizontal" format="dimension"/>
         <attr name="qmui_topbar_text_btn_color_state_list" format="reference"/>
         <attr name="qmui_topbar_text_btn_text_size" format="dimension"/>
+        <attr name="qmui_topbar_text_btn_bold" format="boolean"/>
     </declare-styleable>
     <attr name="QMUITopBarStyle" format="reference"/>
 
@@ -393,8 +397,9 @@
         <attr name="qmui_slider_bar_height" format="dimension"/>
         <attr name="qmui_slider_bar_normal_color" format="color"/>
         <attr name="qmui_slider_bar_progress_color" format="color"/>
+        <attr name="qmui_slider_bar_record_progress_color" format="color"/>
         <attr name="qmui_slider_bar_tick_count" format="integer"/>
-        <attr name="qmui_slider_bar_thumb_size_size" format="dimension"/>
+        <attr name="qmui_slider_bar_thumb_size" format="dimension"/>
         <attr name="qmui_slider_bar_thumb_style_attr" format="string"/>
         <attr name="qmui_slider_bar_use_clip_children_by_developer" format="boolean"/>
         <attr name="qmui_slider_bar_padding_hor_for_thumb_shadow" format="dimension"/>

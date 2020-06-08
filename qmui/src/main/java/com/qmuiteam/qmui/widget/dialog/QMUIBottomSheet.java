@@ -22,6 +22,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,6 +34,8 @@ import android.widget.LinearLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.qmuiteam.qmui.R;
+import com.qmuiteam.qmui.layout.QMUIPriorityLinearLayout;
+import com.qmuiteam.qmui.skin.QMUISkinLayoutInflaterFactory;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +46,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.view.LayoutInflaterCompat;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -74,7 +78,7 @@ public class QMUIBottomSheet extends QMUIBaseDialog {
 
     public QMUIBottomSheet(Context context, int style) {
         super(context, style);
-        ViewGroup container = (ViewGroup) View.inflate(context, R.layout.qmui_bottom_sheet_dialog, null);
+        ViewGroup container = (ViewGroup) getLayoutInflater().inflate(R.layout.qmui_bottom_sheet_dialog, null);
         mRootView = container.findViewById(R.id.bottom_sheet);
         mBehavior = new QMUIBottomSheetBehavior<>();
         mBehavior.setHideable(cancelable);
@@ -236,22 +240,24 @@ public class QMUIBottomSheet extends QMUIBaseDialog {
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         throw new IllegalStateException(
-                "Use addContentView(View, LinearLayout.LayoutParams) for replacement");
+                "Use addContentView(View, QMUIPriorityLinearLayout.LayoutParams) for replacement");
     }
 
     @Override
     public void addContentView(View view, ViewGroup.LayoutParams params) {
         throw new IllegalStateException(
-                "Use addContentView(View, LinearLayout.LayoutParams) for replacement");
+                "Use addContentView(View, QMUIPriorityLinearLayout.LayoutParams) for replacement");
     }
 
-    public void addContentView(View view, LinearLayout.LayoutParams layoutParams) {
+    public void addContentView(View view, QMUIPriorityLinearLayout.LayoutParams layoutParams) {
         mRootView.addView(view, layoutParams);
     }
 
     public void addContentView(View view) {
-        mRootView.addView(view, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        QMUIPriorityLinearLayout.LayoutParams lp =  new QMUIPriorityLinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setPriority(QMUIPriorityLinearLayout.LayoutParams.PRIORITY_DISPOSABLE);
+        mRootView.addView(view, lp);
     }
 
     public void addContentView(int layoutResId) {

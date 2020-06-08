@@ -164,7 +164,7 @@ public class QMUIPriorityLinearLayout extends QMUILinearLayout {
                 // no space for disposableChild
                 for (View view : mTempDisposableChildList) {
                     LayoutParams lp = (LayoutParams) view.getLayoutParams();
-                    lp.width = 0;
+                    lp.height = 0;
                     lp.topMargin = 0;
                     lp.bottomMargin = 0;
                 }
@@ -315,22 +315,17 @@ public class QMUIPriorityLinearLayout extends QMUILinearLayout {
     }
 
     @Override
-    protected LinearLayout.LayoutParams generateDefaultLayoutParams() {
-        return new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-    }
-
-    @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams && super.checkLayoutParams(p);
     }
 
     public static class LayoutParams extends LinearLayout.LayoutParams {
-        static final int PRIORITY_DISPOSABLE = 1;
-        static final int PRIORITY_MINI_CONTENT_PROTECTION = 2;
-        static final int PRIORITY_INCOMPRESSIBLE = 3;
+        public static final int PRIORITY_DISPOSABLE = 1;
+        public static final int PRIORITY_MINI_CONTENT_PROTECTION = 2;
+        public static final int PRIORITY_INCOMPRESSIBLE = 3;
 
         private int priority = PRIORITY_MINI_CONTENT_PROTECTION;
-        public int miniContentProtectionSize = 0;
+        private int miniContentProtectionSize = 0;
 
         private int backupWidth = Integer.MIN_VALUE;
         private int backupHeight = Integer.MIN_VALUE;
@@ -375,6 +370,10 @@ public class QMUIPriorityLinearLayout extends QMUILinearLayout {
 
         public void setPriority(int priority) {
             this.priority = priority;
+        }
+
+        public void setMiniContentProtectionSize(int miniContentProtectionSize) {
+            this.miniContentProtectionSize = miniContentProtectionSize;
         }
 
         public int getPriority(int orientation) {

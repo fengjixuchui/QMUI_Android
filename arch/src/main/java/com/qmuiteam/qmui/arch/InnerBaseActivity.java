@@ -28,9 +28,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.LayoutInflaterCompat;
 import androidx.lifecycle.Lifecycle;
 
+import com.qmuiteam.qmui.QMUIConfig;
 import com.qmuiteam.qmui.arch.annotation.LatestVisitRecord;
 import com.qmuiteam.qmui.arch.record.LatestVisitArgumentCollector;
 import com.qmuiteam.qmui.arch.record.RecordArgumentEditor;
+import com.qmuiteam.qmui.arch.scheme.QMUISchemeHandler;
 import com.qmuiteam.qmui.skin.QMUISkinLayoutInflaterFactory;
 import com.qmuiteam.qmui.skin.QMUISkinManager;
 
@@ -120,10 +122,21 @@ class InnerBaseActivity extends AppCompatActivity implements LatestVisitArgument
         }
     }
 
+    protected boolean shouldPerformLatestVisitRecord() {
+        return true;
+    }
+
     private void checkLatestVisitRecord() {
         Class<? extends InnerBaseActivity> cls = getClass();
         sLatestVisitActivityUUid = mUUid;
-        if (!cls.isAnnotationPresent(LatestVisitRecord.class)) {
+
+        if (!shouldPerformLatestVisitRecord()) {
+            QMUILatestVisit.getInstance(this).clearActivityLatestVisitRecord();
+            return;
+        }
+
+        LatestVisitRecord latestVisitRecord = cls.getAnnotation(LatestVisitRecord.class);
+        if(latestVisitRecord == null || (latestVisitRecord.onlyForDebug() && !QMUIConfig.DEBUG)){
             QMUILatestVisit.getInstance(this).clearActivityLatestVisitRecord();
             return;
         }
@@ -145,6 +158,10 @@ class InnerBaseActivity extends AppCompatActivity implements LatestVisitArgument
                 skinManager.register(this);
             }
         }
+    }
+
+    public final boolean isStartedByScheme() {
+        return getIntent().getBooleanExtra(QMUISchemeHandler.ARG_FROM_SCHEME, false);
     }
 
     protected boolean useQMUISkinLayoutInflaterFactory() {

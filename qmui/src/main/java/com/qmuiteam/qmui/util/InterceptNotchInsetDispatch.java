@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package com.qmuiteam.qmui.arch;
+package com.qmuiteam.qmui.util;
 
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentContainerView;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.ViewModelStoreOwner;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface QMUIFragmentContainerProvider {
-    int getContextViewId();
-
-    FragmentManager getContainerFragmentManager();
-
-    @Nullable
-    FragmentContainerView getFragmentContainerView();
-
-    ViewModelStoreOwner getContainerViewModelStoreOwner();
-
-    void requestForHandlePopBack(boolean toHandle);
-
-    boolean isChildHandlePopBackRequested();
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface InterceptNotchInsetDispatch {
 }

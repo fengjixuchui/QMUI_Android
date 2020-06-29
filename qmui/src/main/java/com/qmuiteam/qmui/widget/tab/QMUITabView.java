@@ -80,6 +80,12 @@ public class QMUITabView extends FrameLayout implements IQMUISkinHandlerView {
 
     public QMUITabView(@NonNull Context context) {
         super(context);
+        
+        // 使得每个tab可被诸如TalkBack等屏幕阅读器聚焦
+        // 这样视力受损用户（如盲人、低、弱视力）就能与tab交互
+        this.setFocusable(true);
+        this.setFocusableInTouchMode(true);
+        
         setWillNotDraw(false);
         mCollapsingTextHelper = new QMUICollapsingTextHelper(this, 1f);
         mGestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
@@ -665,6 +671,16 @@ public class QMUITabView extends FrameLayout implements IQMUISkinHandlerView {
     public final void draw(Canvas canvas) {
         onDrawTab(canvas);
         super.draw(canvas);
+    }
+    
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+
+        // 给每个tab添加文本标签
+        // 使得TalkBack等屏幕阅读器focus 到 tab上时可将tab的文本通过TTS朗读出来
+        // 这样视力受损用户（如盲人、低、弱视力）就能和widget交互
+        info.setContentDescription(mTab.getText());
     }
 
     protected void onDrawTab(Canvas canvas) {

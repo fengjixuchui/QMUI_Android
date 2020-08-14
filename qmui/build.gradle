@@ -50,11 +50,12 @@ dependencies {
     api "androidx.annotation:annotation:$annotationVersion"
     api "com.google.android.material:material:$materialVersion"
     api "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
+    api project(':type')
     lintChecks project(':lintrule')
 
     //test
     testImplementation "junit:junit:$junitVersion"
-    api 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
+    api 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 

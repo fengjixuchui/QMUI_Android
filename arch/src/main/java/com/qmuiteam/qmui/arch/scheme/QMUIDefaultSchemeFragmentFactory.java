@@ -90,39 +90,74 @@ public class QMUIDefaultSchemeFragmentFactory implements QMUISchemeFragmentFacto
         if (activityClassList.length == 0) {
             return null;
         }
-        loop:
-        for (Class<? extends QMUIFragmentActivity> target : activityClassList) {
+        loop: for (Class<? extends QMUIFragmentActivity> target : activityClassList) {
             Intent intent = QMUIFragmentActivity.intentOf(activity, target, fragmentCls, bundle);
             intent.putExtra(ARG_FROM_SCHEME, true);
             FragmentContainerParam fragmentContainerParam = target.getAnnotation(FragmentContainerParam.class);
-            if (fragmentContainerParam == null || fragmentContainerParam.required().length == 0) {
+            if (fragmentContainerParam == null) {
                 return intent;
             }
+
+            String[] required = fragmentContainerParam.required();
+            String[] optional = fragmentContainerParam.optional();
+
+            if(required.length == 0){
+                putOptionalSchemeValuesToIntent(intent, scheme, optional);
+                return intent;
+            }
+
             if (scheme == null || scheme.isEmpty()) {
+                // not matched.
                 continue;
             }
-            for (String arg : fragmentContainerParam.required()) {
+            for (String arg : required) {
                 SchemeValue value = scheme.get(arg);
-                if (value == null) {
+                putSchemeValueToIntent(intent, arg, value);
+            }
+
+            for (String arg : optional) {
+                SchemeValue value = scheme.get(arg);
+                if(value == null){
+                    // not matched.
                     continue loop;
                 }
-                if (value.type == Boolean.TYPE) {
-                    intent.putExtra(arg, (boolean) value.value);
-                } else if (value.type == Integer.TYPE) {
-                    intent.putExtra(arg, (int) value.value);
-                } else if (value.type == Long.TYPE) {
-                    intent.putExtra(arg, (long) value.value);
-                } else if (value.type == Float.TYPE) {
-                    intent.putExtra(arg, (float) value.value);
-                } else if (value.type == Double.TYPE) {
-                    intent.putExtra(arg, (double) value.value);
-                } else{
-                    intent.putExtra(arg, value.origin);
-                }
+                putSchemeValueToIntent(intent, arg, value);
             }
+
+            putOptionalSchemeValuesToIntent(intent, scheme, optional);
             return intent;
         }
         return null;
+    }
+
+    private void putOptionalSchemeValuesToIntent(Intent intent,
+                                                 @Nullable Map<String, SchemeValue> scheme,
+                                                 String[] optional){
+        if (scheme == null || scheme.isEmpty()) {
+            return;
+        }
+        for (String arg : optional) {
+            SchemeValue value = scheme.get(arg);
+            if(value != null){
+                putSchemeValueToIntent(intent, arg, value);
+            }
+        }
+    }
+
+    private void putSchemeValueToIntent(Intent intent, String arg, @NonNull SchemeValue value){
+        if (value.type == Boolean.TYPE) {
+            intent.putExtra(arg, (boolean) value.value);
+        } else if (value.type == Integer.TYPE) {
+            intent.putExtra(arg, (int) value.value);
+        } else if (value.type == Long.TYPE) {
+            intent.putExtra(arg, (long) value.value);
+        } else if (value.type == Float.TYPE) {
+            intent.putExtra(arg, (float) value.value);
+        } else if (value.type == Double.TYPE) {
+            intent.putExtra(arg, (double) value.value);
+        } else{
+            intent.putExtra(arg, value.origin);
+        }
     }
 
     @Override

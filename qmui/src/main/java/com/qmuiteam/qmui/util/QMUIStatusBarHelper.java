@@ -21,12 +21,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
-import androidx.annotation.ColorInt;
-import androidx.annotation.IntDef;
-import androidx.core.view.ViewCompat;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.IntDef;
+import androidx.core.view.ViewCompat;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -48,7 +49,8 @@ public class QMUIStatusBarHelper {
     public static float sVirtualDensity = -1;
     public static float sVirtualDensityDpi = -1;
     private static int sStatusBarHeight = -1;
-    private static @StatusBarType int mStatusBarType = STATUSBAR_TYPE_DEFAULT;
+    private static @StatusBarType
+    int mStatusBarType = STATUSBAR_TYPE_DEFAULT;
     private static Integer sTransparentValue;
 
     public static void translucent(Activity activity) {
@@ -96,8 +98,9 @@ public class QMUIStatusBarHelper {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            int systemUiVisibility = window.getDecorView().getSystemUiVisibility();
+            systemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            window.getDecorView().setSystemUiVisibility(systemUiVisibility);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && supportTransclentStatusBar6()) {
                 // android 6以后可以改状态栏字体颜色，因此可以自行设置为透明
                 // ZUK Z1是个另类，自家应用可以实现字体颜色变色，但没开放接口
@@ -125,6 +128,21 @@ public class QMUIStatusBarHelper {
 //                window.getDecorView().setSystemUiVisibility(transparentValue);
 //            }
         }
+    }
+
+    /**
+     * 如果原本存在某一个flag， 就将它迁移到 out
+     * @param window
+     * @param out
+     * @param type
+     * @return
+     */
+    public static int retainSystemUiFlag(Window window, int out, int type) {
+        int now = window.getDecorView().getSystemUiVisibility();
+        if ((now & type) == type) {
+            out |= type;
+        }
+        return out;
     }
 
     @TargetApi(28)
@@ -233,26 +251,6 @@ public class QMUIStatusBarHelper {
         return true;
     }
 
-    @TargetApi(23)
-    private static int changeStatusBarModeRetainFlag(Window window, int out) {
-        out = retainSystemUiFlag(window, out, View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        out = retainSystemUiFlag(window, out, View.SYSTEM_UI_FLAG_FULLSCREEN);
-        out = retainSystemUiFlag(window, out, View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        out = retainSystemUiFlag(window, out, View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        out = retainSystemUiFlag(window, out, View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        out = retainSystemUiFlag(window, out, View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        return out;
-    }
-
-    public static int retainSystemUiFlag(Window window, int out, int type) {
-        int now = window.getDecorView().getSystemUiVisibility();
-        if ((now & type) == type) {
-            out |= type;
-        }
-        return out;
-    }
-
-
     /**
      * 设置状态栏字体图标为深色，Android 6
      *
@@ -263,8 +261,12 @@ public class QMUIStatusBarHelper {
     @TargetApi(23)
     private static boolean Android6SetStatusBarLightMode(Window window, boolean light) {
         View decorView = window.getDecorView();
-        int systemUi = light ? View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR : View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-        systemUi = changeStatusBarModeRetainFlag(window, systemUi);
+        int systemUi = decorView.getSystemUiVisibility();
+        if (light) {
+            systemUi |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        } else {
+            systemUi &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        }
         decorView.setSystemUiVisibility(systemUi);
         if (QMUIDeviceHelper.isMIUIV9()) {
             // MIUI 9 低于 6.0 版本依旧只能回退到以前的方案
@@ -333,7 +335,7 @@ public class QMUIStatusBarHelper {
 
             // flyme 在 6.2.0.0A 支持了 Android 官方的实现方案，旧的方案失效
             // 高版本调用这个出现不可预期的 Bug,官方文档也没有给出完整的高低版本兼容方案
-            if(QMUIDeviceHelper.isFlymeLowerThan(7)){
+            if (QMUIDeviceHelper.isFlymeLowerThan(7)) {
                 try {
                     WindowManager.LayoutParams lp = window.getAttributes();
                     Field darkFlag = WindowManager.LayoutParams.class
@@ -355,7 +357,7 @@ public class QMUIStatusBarHelper {
                 } catch (Exception ignored) {
 
                 }
-            }else if(QMUIDeviceHelper.isFlyme()){
+            } else if (QMUIDeviceHelper.isFlyme()) {
                 result = true;
             }
         }

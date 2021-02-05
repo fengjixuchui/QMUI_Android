@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package com.qmuiteam.qmui.type;
+package com.qmuiteam.qmui.arch.scheme;
 
-public interface EnvironmentUpdater {
-    void update(TypeEnvironment env);
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.Map;
+
+public class QMUIDefaultSchemeValueConverter implements QMUISchemeValueConverter {
+    @Override
+    public @NonNull String convert(@NonNull String key, @NonNull String originValue, @Nullable Map<String, String> schemeParams) {
+        return originValue;
+    }
 }

@@ -30,10 +30,10 @@ import java.util.Map;
 
 public class QMUISchemeHandler {
     static final String TAG = "QMUISchemeHandler";
-    public static String ARG_FROM_SCHEME = "__qmui_arg_from_scheme";
-    public static String ARG_ORIGIN_SCHEME = "__qmui_arg_origin_scheme";
-    public static String ARG_FORCE_TO_NEW_ACTIVITY = "__qmui_force_to_new_activity";
-    public static String ARG_FINISH_CURRENT = "__qmui_finish_current";
+    public final static String ARG_FROM_SCHEME = "__qmui_arg_from_scheme";
+    public final static String ARG_ORIGIN_SCHEME = "__qmui_arg_origin_scheme";
+    public final static String ARG_FORCE_TO_NEW_ACTIVITY = "__qmui_force_to_new_activity";
+    public final static String ARG_FINISH_CURRENT = "__qmui_finish_current";
 
     private static SchemeMap sSchemeMap;
 
@@ -130,11 +130,9 @@ public class QMUISchemeHandler {
         }
         String action = elements[0];
 
-        Map<String, String> params;
-        if (elements.length < 2) {
-            params = null;
-        } else {
-            params = parseParams(elements[1]);
+        Map<String, String> params = new HashMap<>();
+        if (elements.length > 1) {
+            parseParams(elements[1], params);
         }
 
         boolean handled = false;
@@ -166,13 +164,12 @@ public class QMUISchemeHandler {
         return handled;
     }
 
-    @Nullable
-    public Map<String, String> parseParams(@Nullable String schemeParams) {
+
+    public static void parseParams(@Nullable String schemeParams, @NonNull Map<String, String> queryMap) {
         if (schemeParams == null || schemeParams.isEmpty()) {
-            return null;
+            return;
         }
 
-        Map<String, String> queryMap = new HashMap<>();
         int start = 0;
         do {
             int next = schemeParams.indexOf('&', start);
@@ -196,7 +193,6 @@ public class QMUISchemeHandler {
             queryMap.put(name, value);
             start = end + 1;
         } while (start < schemeParams.length());
-        return queryMap;
     }
 
 

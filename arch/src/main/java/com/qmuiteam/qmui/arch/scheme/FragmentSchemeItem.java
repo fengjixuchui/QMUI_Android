@@ -56,8 +56,10 @@ class FragmentSchemeItem extends SchemeItem {
                               @Nullable String[] keysForLong,
                               @Nullable String[] keysForFloat,
                               @Nullable String[] keysForDouble,
-                              @Nullable Class<? extends QMUISchemeMatcher> schemeMatcherCls) {
-        super(required, useRefreshIfMatchedCurrent, keysForInt, keysForBool, keysForLong, keysForFloat, keysForDouble, schemeMatcherCls);
+                              @Nullable Class<? extends QMUISchemeMatcher> schemeMatcherCls,
+                              @Nullable Class<? extends QMUISchemeValueConverter> schemeValueConverterCls) {
+        super(required, useRefreshIfMatchedCurrent, keysForInt, keysForBool, keysForLong,
+                keysForFloat, keysForDouble, schemeMatcherCls, schemeValueConverterCls);
         mFragmentCls = fragmentCls;
         mActivityClsList = activityClsList;
         mForceNewActivity = forceNewActivity;
@@ -104,7 +106,7 @@ class FragmentSchemeItem extends SchemeItem {
         if (!isCurrentActivityCanStartFragment(activity, scheme) || isForceNewActivity(scheme)) {
             Intent intent = factory.factory(activity, mActivityClsList, mFragmentCls, scheme, origin);
             if (intent != null) {
-                activity.startActivity(intent);
+                factory.startActivity(activity, intent);
                 if(shouldFinishCurrent(scheme)){
                     activity.finish();
                 }
@@ -127,9 +129,9 @@ class FragmentSchemeItem extends SchemeItem {
         if(fragment != null){
             int commitId;
             if(shouldFinishCurrent(scheme)){
-                commitId = fragmentActivity.startFragmentAndDestroyCurrent(fragment, true);
+                commitId = factory.startFragmentAndDestroyCurrent(fragmentActivity, fragment);
             }else{
-                commitId = fragmentActivity.startFragment(fragment);
+                commitId = factory.startFragment(fragmentActivity, fragment);
             }
             if (commitId == -1) {
                 QMUILog.d(QMUISchemeHandler.TAG, "start fragment failed.");
@@ -210,10 +212,8 @@ class FragmentSchemeItem extends SchemeItem {
         SchemeValue schemeValue = null;
         if(!QMUILangHelper.isNullOrEmpty(mForceNewActivityKey)){
             schemeValue = scheme.get(mForceNewActivityKey);
-        }
-
-        if(schemeValue == null){
-            schemeValue = scheme.get(mForceNewActivityKey);
+        }else{
+            schemeValue = scheme.get(QMUISchemeHandler.ARG_FORCE_TO_NEW_ACTIVITY);
         }
 
         return schemeValue != null && schemeValue.type == Boolean.TYPE && ((Boolean) schemeValue.value);

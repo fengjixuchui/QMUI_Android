@@ -13,26 +13,23 @@
  * either express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.qmuiteam.qmui.type.element
 
-package com.qmuiteam.qmui.type.parser;
+import android.graphics.Canvas
+import com.qmuiteam.qmui.type.TypeEnvironment
 
-import android.graphics.drawable.Drawable;
+open class TextElement(text: CharSequence, index: Int, start: Int) : Element(text, index, start) {
 
-import androidx.annotation.Nullable;
+    override fun onMeasure(env: TypeEnvironment) {
+        val paint = env.paint
+        setMeasureDimen(paint.measureText(text, 0, text.length),
+                paint.fontMetrics.descent - paint.fontMetrics.ascent,
+                -paint.fontMetrics.ascent)
+    }
 
-public interface EmojiResourceProvider {
-
-    @Nullable
-    Drawable queryForDrawable(CharSequence text);
-
-    @Nullable
-    Drawable queryForDrawable(char c);
-
-    @Nullable
-    Drawable queryForDrawable(int codePoint);
-
-    @Nullable
-    Drawable queryForDrawable(int firstCodePoint, int secondCodePint);
-
-
+    override fun onDraw(env: TypeEnvironment, canvas: Canvas) {
+        drawBg(env, canvas)
+        canvas.drawText(text, 0, text.length, x, y + baseLine, env.paint)
+        drawBorder(env, canvas)
+    }
 }
